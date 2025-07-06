@@ -1,29 +1,70 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaTelegram, FaVk, FaYoutube } from 'react-icons/fa';
+import { 
+  FaEnvelope, 
+  FaPhone, 
+  FaMapMarkerAlt, 
+  FaTelegram, 
+  FaVk, 
+  FaYoutube 
+} from 'react-icons/fa';
 import './Footer.css';
+
+const FOOTER_DATA = {
+  popularCourses: [
+    { id: 1, slug: 'algorithm-rush', title: 'Algorithm Rush: Код как спорт' },
+    { id: 2, slug: 'blender-cad', title: 'Blender & CAD: Дизайн будущего' },
+    { id: 3, slug: 'ai-blackbox', title: 'AI Blackbox: От данных до нейросетей' }
+  ],
+  socialLinks: {
+    telegram: { url: 'https://t.me/eduonline_school', label: 'Telegram' },
+    vk: { url: 'https://vk.com/eduonline_school', label: 'VKontakte' },
+    youtube: { url: 'https://youtube.com/c/eduonline_school', label: 'YouTube' }
+  },
+  navigation: [
+    { id: 1, target: '/', label: 'Главная' },
+    { id: 2, target: '/courses', label: 'Все курсы' },
+    { id: 3, target: '#testimonials', label: 'Отзывы' },
+    { id: 4, target: '#contact', label: 'Контакты' }
+  ]
+};
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  // Данные курсов
-  const popularCourses = [
-    { id: 1, slug: 'web-development', title: 'Веб-разработка' },
-    { id: 2, slug: 'ui-design', title: 'Дизайн интерфейсов' },
-    { id: 3, slug: 'digital-marketing', title: 'Digital-маркетинг' },
-    { id: 4, slug: 'mobile-development', title: 'Мобильная разработка' }
-  ];
-
-  // Ссылки на соцсети
-  const socialLinks = {
-    telegram: 'https://t.me/eduonline_school',
-    vk: 'https://vk.com/eduonline_school',
-    youtube: 'https://youtube.com/c/eduonline_school'
+  const handleLinkClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const renderedCourses = useMemo(() => (
+    FOOTER_DATA.popularCourses.map(course => (
+      <li key={course.id}>
+        <Link 
+          to={`/courses/${course.slug}`} 
+          className="course-link"
+          onClick={handleLinkClick}
+        >
+          {course.title}
+        </Link>
+      </li>
+    ))
+  ), []);
+
+  const renderedNavigation = useMemo(() => (
+    FOOTER_DATA.navigation.map(item => (
+      <li key={item.id}>
+        {item.target.startsWith('#') ? (
+          <a href={item.target}>{item.label}</a>
+        ) : (
+          <Link to={item.target} onClick={handleLinkClick}>{item.label}</Link>
+        )}
+      </li>
+    ))
+  ), []);
+
   return (
-    <footer className="footer">
-      <div className="footer-wave">
+    <footer className="footer" role="contentinfo">
+      <div className="footer-wave" aria-hidden="true">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
           <path 
             d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" 
@@ -44,82 +85,62 @@ const Footer = () => {
 
       <div className="container">
         <div className="footer-content">
-          {/* Лого и описание */}
           <div className="footer-about">
-            <a href="#home" className="footer-logo">
-              <span>Cod</span>Ium
-            </a>
+            <Link to="/" className="footer-logo" onClick={handleLinkClick}>
+              <span>И</span>IП
+            </Link>
             <p className="footer-description">
               Современная платформа онлайн-образования с курсами от практикующих экспертов.
               Обучение с нуля до профессионала.
             </p>
             <div className="footer-social">
-              <a 
-                href={socialLinks.telegram} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Telegram"
-              >
-                <FaTelegram className="social-icon" />
-              </a>
-              <a 
-                href={socialLinks.vk} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="VK"
-              >
-                <FaVk className="social-icon" />
-              </a>
-              <a 
-                href={socialLinks.youtube} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-              >
-                <FaYoutube className="social-icon" />
-              </a>
+              {Object.entries(FOOTER_DATA.socialLinks).map(([key, {url, label}]) => {
+                const Icon = 
+                  key === 'telegram' ? FaTelegram :
+                  key === 'vk' ? FaVk : FaYoutube;
+                
+                return (
+                  <a 
+                    key={key}
+                    href={url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                  >
+                    <Icon className="social-icon" />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
-          {/* Быстрые ссылки */}
-          <div className="footer-links">
-            <h4 className="footer-title">Навигация</h4>
+          <nav className="footer-links" aria-label="Основная навигация">
+            <h2 className="footer-title">Навигация</h2>
             <ul>
-              <li><a href="#home">Главная</a></li>
-              <li><a href="#courses">Курсы</a></li>
-              <li><a href="#testimonials">Отзывы</a></li>
-              <li><a href="#contact">Контакты</a></li>
+              {renderedNavigation}
             </ul>
-          </div>
+          </nav>
 
-          {/* Популярные курсы */}
           <div className="footer-courses">
-            <h4 className="footer-title">Популярные курсы</h4>
+            <h2 className="footer-title">Популярные курсы</h2>
             <ul>
-              {popularCourses.map(course => (
-                <li key={course.id}>
-                  <Link to={`/courses/${course.slug}`} className="course-link">
-                    {course.title}
-                  </Link>
-                </li>
-              ))}
+              {renderedCourses}
             </ul>
           </div>
 
-          {/* Контакты */}
-          <section id="contact" className="footer-contact">
-            <h4 className="footer-title">Контакты</h4>
+          <section id="contact" className="footer-contact" aria-label="Контактная информация">
+            <h2 className="footer-title">Контакты</h2>
             <ul className="contact-list">
               <li className="contact-item">
-                <FaEnvelope className="contact-icon" />
+                <FaEnvelope className="contact-icon" aria-hidden="true" />
                 <a href="mailto:info@eduonline.com">info@eduonline.com</a>
               </li>
               <li className="contact-item">
-                <FaPhone className="contact-icon" />
+                <FaPhone className="contact-icon" aria-hidden="true" />
                 <a href="tel:+71234567890">+7 (123) 456-78-90</a>
               </li>
               <li className="contact-item">
-                <FaMapMarkerAlt className="contact-icon" />
+                <FaMapMarkerAlt className="contact-icon" aria-hidden="true" />
                 <span>Москва, ул. Образцова, 1</span>
               </li>
             </ul>
@@ -127,10 +148,10 @@ const Footer = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; {currentYear} EduOnline. Все права защищены.</p>
+          <p>&copy; {currentYear} ИIП. Все права защищены.</p>
           <div className="footer-legal">
-            <a href="#privacy">Политика конфиденциальности</a>
-            <a href="#terms">Условия использования</a>
+            <Link to="/privacy" onClick={handleLinkClick}>Политика конфиденциальности</Link>
+            <Link to="/terms" onClick={handleLinkClick}>Условия использования</Link>
           </div>
         </div>
       </div>
