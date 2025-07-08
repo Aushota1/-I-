@@ -40,7 +40,7 @@ export const courses = {
   },
 
   'algorithm-rush': {
-    title: 'Frontend Pro',
+    title: 'algorithm-rush',
     image: '/images/frontend.jpg',
     excerpt: 'Создавайте профессиональные веб-приложения на React.',
     description: 'Курс охватывает React, TypeScript, маршрутизацию, хуки и Framer Motion.',
