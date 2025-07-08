@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { loginUser } from '../api';
 import './AuthPages.css';
 
 const LoginPage = () => {
@@ -8,9 +8,18 @@ const LoginPage = () => {
     email: '',
     password: ''
   });
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+      // Очищаем state после отображения сообщения
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,81 +29,53 @@ const LoginPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Базовая валидация
-    const newErrors = {};
-    if (!formData.email.includes('@')) newErrors.email = 'Введите корректный email';
-    if (formData.password.length < 1) newErrors.password = 'Введите пароль';
-    
-    setErrors(newErrors);
-    
-    if (Object.keys(newErrors).length === 0) {
-      setIsLoading(true);
-      
-      // Имитация загрузки (можно удалить в реальном приложении)
-      setTimeout(() => {
-        // Перенаправление на страницу профиля
-        navigate('/profile');
-        setIsLoading(false);
-      }, 800);
+    try {
+      await loginUser(formData);
+      navigate('/profile');
+    } catch (err) {
+      setError(typeof err === 'string' ? err : 'Login failed');
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <Link to="/" className="back-button">
-          <FaArrowLeft /> На главную
-        </Link>
-        
-        <div className="auth-header">
-          <h2>Вход в аккаунт</h2>
-          <p>Введите ваши данные для входа</p>
+    <div className="auth-container">
+      <h2>Welcome Back</h2>
+      {successMessage && <div className="success-message">{successMessage}</div>}
+      {error && <div className="error-message">{error}</div>}
+      
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
         </div>
         
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="input-group">
-            <FaEnvelope className="input-icon" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-            {errors.email && <span className="input-error">{errors.email}</span>}
-          </div>
-          
-          <div className="input-group">
-            <FaLock className="input-icon" />
-            <input
-              type="password"
-              name="password"
-              placeholder="Пароль"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            {errors.password && <span className="input-error">{errors.password}</span>}
-          </div>
-          
-          <button 
-            type="submit" 
-            className="btn btn-primary btn-block"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Вход...' : 'Войти'}
-          </button>
-          
-          <div className="auth-footer">
-            <p>
-              Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
-            </p>
-          </div>
-        </form>
+        <div className="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        
+        <button type="submit" className="submit-btn">
+          Login
+        </button>
+      </form>
+      
+      <div className="auth-footer">
+        Don't have an account? <a href="/register">Sign up</a>
       </div>
     </div>
   );
